@@ -1,7 +1,10 @@
 package com.bignerdranch.android.criminalintent;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -13,6 +16,7 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -20,6 +24,8 @@ public class CrimeFragment extends Fragment {
 	
 	public static final String EXTRA_CRIME_ID = 
 			"com.bignerdranch.android.criminalintent.crime_id";
+	private static final String DIALOG_DATE = "date";
+	private static int REQUEST_DATE= 0;
 	
 	private Crime mCrime;
 	private EditText mTitleField;
@@ -106,13 +112,32 @@ public class CrimeFragment extends Fragment {
 			}
 		});
 		
-		mDateButton = (Button)v.findViewById(R.id.crime_date);
-		
-		// Format date using SimpleDateFormat class
-		SimpleDateFormat sdf = new SimpleDateFormat("EEEE, MMM dd, yyyy", Locale.US);
-        mDateButton.setText(sdf.format(mCrime.getDate()));
-		//mDateButton.setText(mCrime.getDate().toString());
-		mDateButton.setEnabled(false);
+		mDateButton = (Button)v.findViewById(R.id.crime_date);		
+		updateDate(mCrime.getDate());        
+		mDateButton.setOnClickListener( new View.OnClickListener() {
+			/**
+			 * Show a DatePicker dialog
+			 */
+			@Override
+			public void onClick(View v) {
+				FragmentManager fm = 
+						getActivity().getSupportFragmentManager();
+				
+				/* create the DatePicker fragment */
+				DatePickerFragment dialog =
+						DatePickerFragment.newInstance(mCrime.getDate());
+				
+				/* set up this fragment to receive data that is returned from the 
+				 * DatePicker fragment 
+	             */
+				dialog.setTargetFragment(CrimeFragment.this, REQUEST_DATE);
+				
+				/* show the DatePicker fragment. DIALOG_DATE is a string
+				 * that uniquely identifies the DialogFragment in the
+				 * Fragment Manager's list  */
+				dialog.show(fm, DIALOG_DATE);
+			}
+		} );
 		
 		mSolvedCheckBox = (CheckBox)v.findViewById(R.id.crime_solved);
 		mSolvedCheckBox.setChecked(mCrime.isSolved());
@@ -125,6 +150,26 @@ public class CrimeFragment extends Fragment {
 		});
 		
 		return v;
+	}
+
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if ( resultCode != Activity.RESULT_OK) return;
+		
+		if ( requestCode == REQUEST_DATE )
+		{
+			Date date = (Date)data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
+			mCrime.setDate(date);
+			updateDate(date);
+		}
+	}
+	
+	private void updateDate( Date date )
+	{
+		// Format date using SimpleDateFormat class
+		SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US);
+        mDateButton.setText(sdf.format(date));
 	}
 	
 

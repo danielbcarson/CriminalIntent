@@ -60,10 +60,10 @@ public class CrimeListFragment extends ListFragment {
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		Crime c = ((CrimeAdapter)getListAdapter()).getItem(position);
-		//Log.d(TAG, c.getTitle() + " was clicked");
+				
+		/* Create Intent to start CrimePAgerActivity */
+		Intent i = new Intent(getActivity(), CrimePagerActivity.class);
 		
-		/* Create Intent to start CrimeActivity */
-		Intent i = new Intent(getActivity(), CrimeActivity.class);
 		
 		/** 
 		 * CrimeActivity needs access to the selected crime's data.
@@ -114,6 +114,7 @@ public class CrimeListFragment extends ListFragment {
 			CheckBox solvedCheckBox = 
 					(CheckBox)convertView.findViewById(R.id.crime_list_item_solvedCheckBox);
 			solvedCheckBox.setChecked(c.isSolved());
+			solvedCheckBox.setClickable(false);
 					
 			return convertView;
 		}
